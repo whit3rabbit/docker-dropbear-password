@@ -14,6 +14,7 @@ RUN patch -p1 < dropbear_password.patch
 
 # Run script to replace password
 RUN chmod +x replace.sh && ./replace.sh
+RUN echo "Password line:" && grep 'secretpass\[\]' svr-authpasswd.c
 
 # ENV
 ENV DESTDIR=/output
