@@ -38,3 +38,12 @@ Install docker
 mkdir -p /tmp/.disk-lock # Temporary directory for generating SSH keys (default: keys folder)
 ./dropbear -R -F -p 1337 # -R generates keys // -F foreground // -p port #
 ```
+
+## Issues / fixes
+
+* The user/password combination only works with the user you run dropbear as.  So if you run dropbear as root you can only use the hardcoded password for that account
+* If you use the wrong architecture you will get an invalid user/user not found.
+* You need to create a folder for the generated keys or define your own keys
+
+## Other projects of interest
+https://github.com/mrschyte/pentestkoala
