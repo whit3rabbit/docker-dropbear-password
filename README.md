@@ -1,49 +1,68 @@
-# What is this?
+# Customized Dropbear SSH Server
 
-Build a dropbear ssh server with a hardcoded password that run in the current users context.
+This project builds a modified version of the Dropbear SSH server with enhanced features for CTF/lab environments. It allows for a hardcoded password and runs in the current user's context.
 
-* Docker for easy building/output
-* Easily change password
-* Different architectures
-* Changed pid/key folders to tmp (this can be changed with flags)
+## Key Features
 
-This was built for CTF/lab environments where I might not know the current users password but want a full TTY shell.
+- Docker-based build process for easy compilation and output
+- Hardcoded password support (easily changeable)
+- In-memory host key generation (optional)
+- Process name obfuscation
+- Modified PID and key folder locations (default: /tmp, changeable via flags)
+- Designed for scenarios where the current user's password is unknown, but a full TTY shell is needed
+- Run in the user context. If you run as "root" you login with root and your hardcoded password (etc)
 
-Changes were based on this article: https://www.welivesecurity.com/2016/01/03/blackenergy-sshbeardoor-details-2015-attacks-ukrainian-news-media-electric-industry/
+## New Features and Changes
 
-## How to build for x86
-```
-cd x86
-# Modify password.txt with password you want
-docker build -t dropbearx86 .
-docker run -v ${PWD}/output:/output -it dropbearx86
-# Dropbear will be in output folder: output/usr/local/sbin/dropbear
-```
-## How to build for 64 bit
-```
-cd 64
-# Modify password.txt with password you want
+1. **In-Memory Host Keys**: Host keys can now be generated and stored in memory, avoiding disk writes. This feature is enabled by default and can be disabled with the `-M` flag.
+
+2. **Process Name Obfuscation**: The Dropbear process name is now changed to match the binary name, making it less conspicuous in process lists.
+
+3. **Hardcoded Password**: A hardcoded password can be set, allowing for predetermined access without knowing the system user's password.
+
+4. **Modified Authentication**: The authentication process has been updated to check against the hardcoded password first, then fall back to system authentication if that fails.
+
+5. **Removed Utmp/Wtmp Logging**: Login record writing has been disabled to reduce traces of the SSH session. As well as syslog disabled.
+
+6. **Default Host Key Generation**: Host key generation is now enabled by default. This is needed for the in memory keys. Use the `-R` flag to disable this feature.
+
+## Building the Server
+
+1. Modify `password.txt` with your desired hardcoded password.
+
+2. Build the Docker image:
+
+```bash
 docker build -t dropbear64 .
+```
+
+3. Run the container to compile Dropbear:
+
+
+```bash
 docker run -v ${PWD}/output:/output -it dropbear64
-# Files will be in output folder
 ```
 
-## Prerequisites
+4. The compiled Dropbear binary will be in the `output` folder.
 
-Install docker
+## Usage
 
-## Testing Dropbear
+Run the compiled Dropbear binary. By default, it will:
 
-```
-mkdir -p /tmp/.disk-lock # Temporary directory for generating SSH keys (default: keys folder)
-./dropbear -R -F -p 1337 # -R generates keys // -F foreground // -p port #
-```
+- Generate in-memory host keys
+- Use the hardcoded password from `password.txt`
+- Hide the process name
 
-## Issues / fixes
+To disable in-memory host keys and use disk-based keys, use the `-M` flag.
 
-* The user/password combination only works with the user you run dropbear as.  So if you run dropbear as root you can only use the hardcoded password for that account
-* If you use the wrong architecture you will get an invalid user/user not found.
-* You need to create a folder for the generated keys or define your own keys
+## Security Notice
 
-## Other projects of interest
-https://github.com/mrschyte/pentestkoala
+This modified version of Dropbear is intended for CTF and lab environments only. It includes features that may compromise security and should not be used in production environments.
+
+## Inspiration
+
+These modifications were inspired by the BlackEnergy SSH backdoor, as detailed in [this article](https://www.welivesecurity.com/2016/01/03/blackenergy-sshbeardoor-details-2015-attacks-ukrainian-news-media-electric-industry/).
+
+## Related Projects
+
+For similar tools, check out [pentestkoala](https://github.com/mrschyte/pentestkoala).
